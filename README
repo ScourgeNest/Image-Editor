@@ -1,0 +1,118 @@
+##### Copyright 2023 Niculici Mihai-Daniel (mihai.viper90@gmail.com)
+
+		image_editor.c
+		
+	Pentru o rezolvare mai eficienta a temei 3, am folosit 2 structuri:
+	-Image_prop, care contine proprietatile unei imagini precum tipul,
+	latimea, lungimea, numele, selectia pozei, daca este incarcata sau
+	nu si imaginea cu totul stocata intr-o matrice potrivita pentru tipul
+	imaginii
+	-Pixel este o structura care ma ajuta sa lucrez mai usor cu imaginile
+	color, stocand valorile RGB cu ajutorul ei.
+	
+	Programul citeste comenzi la infinit, el oprindu-se atunci cand
+	intalneste comanda "EXIT".
+	Am folosit switch pentru a vedea mai usor ce comanda a fost introdusa.
+	Atunci cand introducem o comanda, avem mai multe cazuri:
+
+	a) La comanda "LOAD", programul deschide fisierul dat si extrage toate
+	informatiile folositoare din acesta precum tipul imaginii, dimensiunea,
+	culoarea maxima, dar si toata imaginea pe care o stochez intr-o matrice
+	alocata dinamic. Aceasta comanda afiseaza in output daca comanda a fost
+	efectuata cu succes sau nu.
+
+	b) La comanda "SELECT", programul extrage toata linia, apoi extrage
+	informatiile folositoare din ea precum coordonatele x1, y1, x2, y2 sau
+	"ALL". Daca nu extrage aceste informatii, atunci comanda este invalida
+	si se revine la selectia anterioara(in caz ca aceasta exista). De
+	asemenea sunt comparate coordonatele astfel incat in x1 si y1 sa fie
+	valorile mai mici si in x2 si y2 sa fie valorile mai mari. Daca
+	valorile ies din poza sau sunt negative se afiseaza eroare. Se mai
+	afiseaza eroare si daca nu este incarcata nicio imagine. La sfarsit
+	afisez ca au fost selectate cu succes coordonatele date.
+
+	c) La comanda "HISTOGRAM", programul citeste numarul maxim de stelute
+	si numarul de bin-uri, daca nu le poate citi sau ele nu exista,
+	afiseaza eroare, asta intamplandu-se si daca nu este o imagine
+	incarcata sau daca imaginea nu este grayscale. Folosesc un vector de
+	frecventa pentru a vedea de cate ori apare fiecare nuanta de gri.
+	Fiecare bin corespunde unui interval, prin urmare calculez frecventa
+	nuantelor de gri din acel interval adunand fiecare frecventa a
+	nuantei din interval. Dupa aceea, calculez pentru fiecare bin, cate
+	stelute ar trebui sa afisez, dupa care afisez intreaga histograma.
+
+	d) La comanda "EQUALIZE", programul verifica daca este o imagine
+	incarcata si daca este grayscale, dupa care folosesc din nou un
+	vector de frecventa pentru a calcula frecventa fiecarei nuante de gri.
+	Calculez numarul de pixeli al imaginii, dupa care modific fiecare pixel
+	din poza folosind formula data in PDF-ul din Tema_3, calculand fiecare
+	termen al formulei. La final afisez ca imaginea a fost egalizata.
+
+	e) La comanda "ROTATE", programul citeste la cate grade sa roteasca
+	poza, daca unghiul este diferit de 0, +/-90, +/-180, +/-270, +/-360,
+	afiseaza eroare. De asemenea se verifica daca este incarcata o imagine
+	si afiseaza eroare daca nu este incarcata nicio imagine. Pentru a roti
+	imaginea la mai mult de 90 de grade, folosesc de mai multe ori functia
+	de rotire la 90 de grade. Pentru a roti la dreapta, folosesc functia
+	"Rotate_90_right". Aceasta aloca o matrice temporara in functie de
+	tipul imaginii (unsigned char ** pentru imagine grayscale si Pixel **
+	pentru imagine color), dupa care rotesc imaginea in matricea temporara
+	cu ajutorul matricei initiale. Daca am selectata toata imaginea,
+	ii dau "free" matricei initiale si ii atribui acesteia matricea
+	temporara si interschimb dimensiunile. Daca avem selectata doar
+	o portiune din imagine, suprascriu pixelii din
+	matricea initiala din portiunea selectata cu pixelii corespunzatori
+	din matricea temporara. Eliberez matricea temporara.
+		Pentru rotirea la stanga, se foloseste functia "Rotate_90_left"
+	care face exact acelasi lucru ca functia pentru rotire la dreapta,
+	doar ca are indicii schimbati astfel incat imaginea se roteste 
+	la stanga. La sfarsit afisez ca imaginea a fost rotita.
+
+	f) La comanda "CROP", programul calculeaza dimensiunile matricei care
+	urmeaza sa fie taiata, dupa care aloca o matrice temporara in functie
+	de tipul imaginii (unsigned char ** pentru imagine grayscale si Pixel
+	** pentru imagine color) in care se va stoca portiunea taiata din
+	imaginea data. Apoi eliberez memoria pentru matricea initiala,
+	actualizez dimensiunile imaginii, dupa care aloc din nou matricea
+	initiala si copiez din matricea temporara toti pixelii. La final,
+	eliberez memoria matricei temporare. La sfarsit afisez ca imaginea
+	a fost taiata.
+
+	g) La comanda "APPLY", programul verifica daca comanda este valida,
+	daca este o imagine incarcata in program si daca imaginea este color,
+	si afiseaza o eroare daca una din aceste conditii nu este indeplinita.
+	Aloc static o matrice cu dimensiunea de 3x3, apoi ii dau valori in
+	functie de filtrul pe care urmeaza sa-l aplic. Aloc dinamic o matrice
+	temporara in functie de tipul imaginii (unsigned char ** pentru imagine
+	grayscale si Pixel ** pentru imagine color). Copiez matricea initiala
+	in matricea temporara, dupa care parcurg toata matricea si daca nu se
+	afla pe marginea matricei, aplic filtrul pentru pixelul respectiv in
+	modul in care explicat in PDF-ul Tema_3 cu ajutorul pixelilor din
+	jurul lui. Rezultatele valorilor pixelilor le pun in matricea
+	temporara pentru a nu influenta aplicarea filtrului pentru ceilalti
+	pixeli. La sfarsit suprascriu pixelii din matricea initiala cu pixelii
+	din matricea temporara, dupa care eliberez memoria matricei temporare.
+
+	h) La comanda "SAVE", programul citeste numele pe care o sa-l dea
+	fisierului in care se va afla imaginea incarcata in program. Apoi
+	verific daca am ce sa salvez, adica daca am o imagine incarcata si
+	daca vreau ca imaginea salvata sa fie in mod binar sau in ascii.
+	Deschid un fisier cu numele dat, dupa care scriu tipul imaginii,
+	dimensiunile, si valoarea la care se atinge intensitatea maxima a
+	culorilor. Scriu in fisier valorile pixelilor in modul indicat in
+	comanda cu ajutorul matricei "image->matrix" care este de tipul
+	unsigned char** pentru imaginile grayscale si cu ajutorul matricei
+	"image->color_matrix" care este de tipul Pixel ** (care imi permite
+	sa stochez 3 variabile de tip unsigned char, adica Red, Green, Blue)
+	pentru imaginile color. Dupa care Inchid fisierul si eliberez memoria
+	alocata pentru numele fisierului.
+
+	i) La comanda "EXIT", programul verifica daca este incarcata o
+	imagine in program, daca da, se elibereaza memoria alocata pentru
+	imagine, sau afiseaza o eroare daca nu este incarcata nicio imagine,
+	dupa care se inchide executia programului.
+
+	j) Daca comanda scrisa nu se incadreaza in niciuna de mai sus, se
+	afiseaza o eroare deoarece comanda este invalida.
+	
+	Am folosit 28 de functii pentru a rezolva Tema 3. :)
